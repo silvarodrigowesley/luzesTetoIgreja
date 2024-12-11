@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Relé</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+            color: #333;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        button {
+            font-size: 1rem;
+            padding: 0.6rem 1.2rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:first-of-type {
+            background: #28a745;
+            color: #fff;
+        }
+        button:first-of-type:hover {
+            background: #218838;
+        }
+        button:last-of-type {
+            background: #dc3545;
+            color: #fff;
+        }
+        button:last-of-type:hover {
+            background: #c82333;
+        }
+        #status {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        #messages {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        #messages p {
+            margin-bottom: 0.5rem;
+            padding: 0.3rem;
+            background: #e9f7ef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Luz Teto Igreja</h1>
+        <button onclick="sendRelayOn()">Ligar Relé</button>
+        <button onclick="sendRelayOff()">Desligar Relé</button>
+
+        <p id="status">Status: Desconectado</p>
+        <p><strong>Mensagens Recebidas:</strong></p>
+        <div id="messages"></div> <!-- Aqui será exibido o histórico de mensagens -->
+    </div>
+
+    <script>
+        const dispositiveIp = 'ws://192.168.68.135:81/';
+        const websocket = new WebSocket(dispositiveIp);
+
+        websocket.onopen = function() {
+            document.getElementById("status").innerText = "Status: Conectado";
+            console.log("Conectado");
+        };
+
+        websocket.onclose = function() {
+            document.getElementById("status").innerText = "Status: Desconectado";
+            console.log("Desconectado");
+        };
+
+        websocket.onmessage = function(event) {
+            console.log("Resposta:", event.data);
+            const messagesDiv = document.getElementById("messages");
+            const newMessage = document.createElement("p");
+            newMessage.innerText = "Status: " + event.data;
+            messagesDiv.appendChild(newMessage); // Adiciona a mensagem recebida ao histórico
+        };
+
+        function sendRelayOn() {
+            const message = JSON.stringify({ relay: "on" });
+            websocket.send(message);
+            console.log("Enviado: ", message);
+        }
+
+        function sendRelayOff() {
+            const message = JSON.stringify({ relay: "off" });
+            websocket.send(message);
+            console.log("Enviado: ", message);
+        }
+    </script>
+</body>
+</html>
